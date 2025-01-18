@@ -1,0 +1,54 @@
+<div class="container mx-auto p-4 max-w-lg">
+  <h1 class="text-2xl font-bold mb-6">
+    {{isEditing ? 'Edit Album' : 'Create New Album'}}
+  </h1>
+
+  <form [formGroup]="albumForm" (ngSubmit)="onSubmit()" class="space-y-4">
+    <div>
+      <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
+      <input type="text"
+             id="title"
+             formControlName="title"
+             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+
+      <div *ngIf="albumForm.get('title')?.touched && albumForm.get('title')?.invalid"
+           class="text-red-500 text-sm mt-1">
+        <div *ngIf="albumForm.get('title')?.errors?.['required']">
+          Title is required
+        </div>
+        <div *ngIf="albumForm.get('title')?.errors?.['minlength']">
+          Title must be at least 3 characters
+        </div>
+        <div *ngIf="albumForm.get('title')?.errors?.['maxlength']">
+          Title cannot exceed 100 characters
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+      <textarea id="description"
+                formControlName="description"
+                rows="3"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
+
+      <div *ngIf="albumForm.get('description')?.touched && albumForm.get('description')?.errors?.['maxlength']"
+           class="text-red-500 text-sm mt-1">
+        Description cannot exceed 500 characters
+      </div>
+    </div>
+
+    <div class="flex justify-end space-x-3">
+      <button type="button"
+              [routerLink]="['']"
+              class="px-4 py-2 border rounded-md hover:bg-gray-50">
+        Cancel
+      </button>
+      <button type="submit"
+              [disabled]="albumForm.invalid || submitting"
+              class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:bg-blue-300">
+        {{isEditing ? 'Update' : 'Create'}} Album
+      </button>
+    </div>
+  </form>
+</div>

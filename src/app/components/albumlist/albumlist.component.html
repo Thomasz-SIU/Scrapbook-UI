@@ -1,0 +1,35 @@
+<div class="container mx-auto p-4">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold">Photo Albums</h1>
+    <button [routerLink]="['/albums/new']"
+            class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 flex items-center">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10 3a1 1 0 00-1 1v5H4a1 1 0 100 2h5v5a1 1 0 102 0v-5h5a1 1 0 100-2h-5V4a1 1 0 00-1-1z" clip-rule="evenodd" />
+      </svg>
+      Create New Album
+    </button>
+  </div>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div *ngFor="let album of albums" class="border rounded-lg p-4 hover:shadow-lg transition-shadow">
+      <h2 class="text-xl font-semibold">{{album.title}}</h2>
+      <p class="text-gray-600">{{album.description}}</p>
+      <p class="text-sm text-gray-500">Created: {{album.createdAt | date}}</p>
+      <div class="mt-4 flex justify-between">
+        <button [routerLink]="['/albums', album.id]"
+                class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+          View Album
+        </button>
+        <button (click)="deleteAlbum(album.id)"
+                class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <button *ngIf="albums.length >= pageSize"
+          (click)="loadMore()"
+          class="mt-4 bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600">
+    Load More
+  </button>
+</div>

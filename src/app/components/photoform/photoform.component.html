@@ -1,0 +1,87 @@
+<div class="container mx-auto p-4 max-w-lg">
+  <h1 class="text-2xl font-bold mb-6">
+    {{isEditing ? 'Edit Photo' : 'Upload New Photo'}}
+  </h1>
+
+  <form [formGroup]="photoForm" (ngSubmit)="onSubmit()" class="space-y-4">
+    <div>
+      <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
+      <input type="text"
+             id="title"
+             formControlName="title"
+             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+
+      <div *ngIf="photoForm.get('title')?.touched && photoForm.get('title')?.invalid"
+           class="text-red-500 text-sm mt-1">
+        <div *ngIf="photoForm.get('title')?.errors?.['required']">
+          Title is required
+        </div>
+        <div *ngIf="photoForm.get('title')?.errors?.['minlength']">
+          Title must be at least 3 characters
+        </div>
+        <div *ngIf="photoForm.get('title')?.errors?.['maxlength']">
+          Title cannot exceed 100 characters
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+      <textarea id="description"
+                formControlName="description"
+                rows="3"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
+
+      <div *ngIf="photoForm.get('description')?.touched && photoForm.get('description')?.errors?.['maxlength']"
+           class="text-red-500 text-sm mt-1">
+        Description cannot exceed 500 characters
+      </div>
+    </div>
+
+    <div>
+      <label for="albumId" class="block text-sm font-medium text-gray-700">Album</label>
+      <select id="albumId"
+              formControlName="albumId"
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+        <option [ngValue]="null">Select an album</option>
+        <option *ngFor="let album of albums" [value]="album.id">
+          {{album.title}}
+        </option>
+      </select>
+
+      <div *ngIf="photoForm.get('albumId')?.touched && photoForm.get('albumId')?.errors?.['required']"
+           class="text-red-500 text-sm mt-1">
+        Please select an album
+      </div>
+    </div>
+
+    <div *ngIf="!isEditing">
+      <label for="photo" class="block text-sm font-medium text-gray-700">Photo</label>
+      <input type="file"
+             id="photo"
+             accept="image/*"
+             (change)="onFileSelected($event)"
+             class="mt-1 block w-full">
+    </div>
+
+    <div *ngIf="previewUrl" class="mt-4">
+      <label class="block text-sm font-medium text-gray-700">Preview</label>
+      <img [src]="previewUrl"
+           alt="Preview"
+           class="mt-1 max-h-48 rounded-lg">
+    </div>
+
+    <div class="flex justify-end space-x-3">
+      <button type="button"
+              [routerLink]="['']"
+              class="px-4 py-2 border rounded-md hover:bg-gray-50">
+        Cancel
+      </button>
+      <button type="submit"
+              [disabled]="photoForm.invalid || submitting"
+              class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:bg-blue-300">
+        {{isEditing ? 'Update' : 'Upload'}} Photo
+      </button>
+    </div>
+  </form>
+</div>
