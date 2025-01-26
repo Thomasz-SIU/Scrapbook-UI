@@ -43,4 +43,8 @@ export class PhotoService {
     downloadPhoto(id: number): Observable<Blob> {
         return this.http.get(`${this.apiUrl}/download/${id}`, { responseType: 'blob' });
     }
+
+    getImageUrl(id: number): string {
+        return `${this.apiUrl}/image/${id}`;
+    }
 }

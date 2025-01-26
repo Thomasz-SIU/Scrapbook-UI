@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PhotoService } from '../../services/photo.service';
 import { AlbumService } from '../../services/album.service';
@@ -7,7 +9,13 @@ import { Album } from '../../models/album.model';
 
 @Component({
     selector: 'app-photo-form',
-    templateUrl: './photo-form.component.html'
+    templateUrl: './photo-form.component.html',
+    standalone: true,
+    imports: [
+        CommonModule,
+        RouterModule,
+        ReactiveFormsModule
+    ]
 })
 export class PhotoFormComponent implements OnInit {
     photoForm: FormGroup;
@@ -28,27 +36,27 @@ export class PhotoFormComponent implements OnInit {
         this.photoForm = this.fb.group({
             title: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
             description: ['', [Validators.maxLength(500)]],
-            albumId: ['', [Validators.required]]
+            albumId: [null, [Validators.required]]
         });
     }
 
     ngOnInit(): void {
         this.loadAlbums();
 
-        // Check for query params (albumId when creating new photo)
         this.route.queryParams.subscribe(params => {
-            if (params['albumId']) {
+            const albumId = params['albumId'];
+            if (albumId) {
                 this.photoForm.patchValue({
-                    albumId: +params['albumId']
+                    albumId: +albumId
                 });
             }
         });
 
-        // Check for route params (photoId when editing)
         this.route.params.subscribe(params => {
-            if (params['id']) {
+            const id = params['id'];
+            if (id) {
                 this.isEditing = true;
-                this.photoId = +params['id'];
+                this.photoId = +id;
                 this.loadPhoto();
             }
         });
@@ -60,23 +68,25 @@ export class PhotoFormComponent implements OnInit {
     }
 
     loadPhoto(): void {
-        this.photoService.getPhoto(this.photoId!)
+        if (this.photoId === undefined) return;
+
+        this.photoService.getPhoto(this.photoId)
             .subscribe(photo => {
                 this.photoForm.patchValue({
                     title: photo.title,
                     description: photo.description,
                     albumId: photo.albumId
                 });
-                this.previewUrl = photo.imageUrl;
+                this.previewUrl = this.photoService.getImageUrl(photo.id!);
             });
     }
 
     onFileSelected(event: Event): void {
-        const file = (event.target as HTMLInputElement).files?.[0];
+        const element = event.target as HTMLInputElement;
+        const file = element.files?.[0];
         if (file) {
             this.selectedFile = file;
 
-            // Create preview URL
             const reader = new FileReader();
             reader.onload = () => {
                 this.previewUrl = reader.result as string;
@@ -90,8 +100,8 @@ export class PhotoFormComponent implements OnInit {
             this.submitting = true;
             const photoData = this.photoForm.value;
 
-            if (this.isEditing) {
-                this.photoService.updatePhoto(this.photoId!, photoData)
+            if (this.isEditing && this.photoId !== undefined) {
+                this.photoService.updatePhoto(this.photoId, photoData)
                     .subscribe({
                         next: () => {
                             this.router.navigate(['/albums', photoData.albumId]);

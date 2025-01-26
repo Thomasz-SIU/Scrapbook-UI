@@ -16,11 +16,13 @@
       <p class="text-sm text-gray-500">Created: {{album.createdAt | date}}</p>
       <div class="mt-4 flex justify-between">
         <button [routerLink]="['/albums', album.id]"
-                class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                [disabled]="!album.id">
           View Album
         </button>
         <button (click)="deleteAlbum(album.id)"
-                class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                [disabled]="!album.id">
           Delete
         </button>
       </div>

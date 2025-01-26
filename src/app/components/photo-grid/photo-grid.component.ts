@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { PhotoService } from '../../services/photo.service';
 import { AlbumService } from '../../services/album.service';
@@ -7,13 +9,19 @@ import { Album } from '../../models/album.model';
 
 @Component({
     selector: 'app-photo-grid',
-    templateUrl: './photo-grid.component.html'
+    templateUrl: './photo-grid.component.html',
+    standalone: true,
+    imports: [
+        CommonModule,
+        RouterModule
+    ]
 })
 export class PhotoGridComponent implements OnInit {
     photos: Photo[] = [];
     album?: Album;
     currentPage = 0;
     pageSize = 20;
+    private apiUrl = 'http://localhost:8080/api/photos';  // Match your API base URL
 
     constructor(
         private route: ActivatedRoute,
@@ -24,9 +32,15 @@ export class PhotoGridComponent implements OnInit {
     ngOnInit(): void {
         this.route.params.subscribe(params => {
             const albumId = +params['id'];
-            this.loadAlbum(albumId);
-            this.loadPhotos(albumId);
+            if (!isNaN(albumId)) {
+                this.loadAlbum(albumId);
+                this.loadPhotos(albumId);
+            }
         });
+    }
+
+    getImageUrl(photo: Photo): string {
+        return this.photoService.getImageUrl(photo.id!);
     }
 
     loadAlbum(albumId: number): void {
@@ -40,13 +54,19 @@ export class PhotoGridComponent implements OnInit {
     }
 
     loadMore(): void {
-        this.currentPage++;
-        this.photoService.getPhotosByAlbum(this.album!.id!, this.currentPage, this.pageSize)
-            .subscribe(photos => this.photos = [...this.photos, ...photos]);
+        if (this.album?.id) {
+            this.currentPage++;
+            this.photoService.getPhotosByAlbum(this.album.id, this.currentPage, this.pageSize)
+                .subscribe(photos => this.photos = [...this.photos, ...photos]);
+        }
     }
 
     downloadPhoto(photo: Photo): void {
-        this.photoService.downloadPhoto(photo.id!)
+        if (photo.id === undefined) {
+            console.error('Cannot download photo: ID is undefined');
+            return;
+        }
+        this.photoService.downloadPhoto(photo.id)
             .subscribe(blob => {
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');

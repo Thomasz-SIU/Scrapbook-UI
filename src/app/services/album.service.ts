@@ -7,6 +7,7 @@ import { Album } from '../models/album.model';
     providedIn: 'root'
 })
 export class AlbumService {
+
     private apiUrl = 'http://localhost:8080/api/albums';
 
     constructor(private http: HttpClient) {}
